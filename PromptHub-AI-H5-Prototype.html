@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PromptHub AI H5 Prototype</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f9fafc;
+      --text: #182230;
+      --muted: #65758b;
+      --line: #dde3ee;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --teal: #0f766e;
+      --green: #16a34a;
+      --amber: #d97706;
+      --rose: #e11d48;
+      --violet: #7c3aed;
+      --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      line-height: 1.5;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 68px;
+      padding: 0 28px;
+      background: rgba(255, 255, 255, 0.92);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 210px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border-radius: var(--radius);
+      background: #111827;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 16px;
+    }
+
+    .brand-text span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #f3f6fb;
+    }
+
+    .nav-tabs button {
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 12px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .nav-tabs button.active {
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-button {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--muted);
+    }
+
+    .avatar {
+      display: grid;
+      width: 36px;
+      height: 36px;
+      place-items: center;
+      border-radius: 50%;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 800;
+    }
+
+    .page {
+      display: none;
+      padding: 24px;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 20px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 92px;
+      align-self: start;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar-title {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .category-list,
+    .menu-list {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .category-list button,
+    .menu-list button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+    }
+
+    .category-list button.active,
+    .menu-list button.active {
+      background: #eff6ff;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .main {
+      min-width: 0;
+    }
+
+    .hero-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+
+    .intro {
+      min-height: 300px;
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(120deg, rgba(37, 99, 235, 0.08), rgba(15, 118, 110, 0.05)),
+        var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      color: var(--teal);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 780px;
+      margin-bottom: 14px;
+      font-size: 42px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin-bottom: 14px;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .intro p {
+      max-width: 760px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 38px;
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .btn.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn.ghost {
+      background: #f8fafc;
+    }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .metric {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .visual-panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #0f172a;
+      color: #e5e7eb;
+      box-shadow: var(--shadow);
+    }
+
+    .visual-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 40px;
+      padding: 0 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+
+    .dot:nth-child(2) {
+      background: #f59e0b;
+    }
+
+    .dot:nth-child(3) {
+      background: #22c55e;
+    }
+
+    .prompt-canvas {
+      padding: 20px;
+    }
+
+    .flow-box {
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .flow-box strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    .flow-box span {
+      color: #cbd5e1;
+      font-size: 13px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px 150px auto;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--text);
+      outline: none;
+    }
+
+    .input,
+    .select {
+      min-height: 40px;
+      padding: 8px 11px;
+    }
+
+    .textarea {
+      min-height: 160px;
+      padding: 12px;
+      resize: vertical;
+    }
+
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 18px 0 12px;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .prompt-card {
+      display: flex;
+      flex-direction: column;
+      min-height: 220px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.green {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge.amber {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .badge.teal {
+      background: #ccfbf1;
+      color: #115e59;
+    }
+
+    .badge.rose {
+      background: #ffe4e6;
+      color: #be123c;
+    }
+
+    .prompt-card p {
+      flex: 1;
+      margin-bottom: 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .tag {
+      padding: 4px 7px;
+      border-radius: 6px;
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tool-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 18px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    .tool-panel,
+    .result-panel,
+    .admin-panel,
+    .pricing-panel,
+    .chat-panel,
+    .conversation-list {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .result-output {
+      min-height: 340px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #111827;
+      color: #dbeafe;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+
+    .split-status {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .mini-stat {
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+    }
+
+    .mini-stat strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .mini-stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .chat-layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .conversation-item {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .conversation-item.active {
+      background: #eff6ff;
+    }
+
+    .conversation-item strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .conversation-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .message-list {
+      display: grid;
+      gap: 12px;
+      min-height: 380px;
+      padding: 16px;
+      background: #f8fafc;
+    }
+
+    .message {
+      max-width: 78%;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .message.assistant {
+      justify-self: start;
+    }
+
+    .message.user {
+      justify-self: end;
+      border-color: #bfdbfe;
+      background: #eff6ff;
+    }
+
+    .chat-input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .pricing-panel {
+      padding: 18px;
+    }
+
+    .price {
+      margin: 12px 0;
+      font-size: 34px;
+      font-weight: 900;
+    }
+
+    .price small {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 8px;
+      margin: 16px 0;
+      padding: 0;
+      color: var(--muted);
+      list-style: none;
+    }
+
+    .feature-list li::before {
+      content: "✓";
+      margin-right: 8px;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .admin-shell {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      gap: 18px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .admin-main {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .status.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status.off {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .mobile-note {
+      display: none;
+      margin: 0 0 14px;
+      padding: 10px 12px;
+      border: 1px solid #bae6fd;
+      border-radius: var(--radius);
+      background: #f0f9ff;
+      color: #0369a1;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1100px) {
+      .hero-panel,
+      .tool-layout,
+      .chat-layout,
+      .admin-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+
+      .prompt-grid,
+      .pricing-grid,
+      .admin-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 12px;
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .nav-tabs {
+        overflow-x: auto;
+        width: 100%;
+      }
+
+      .top-actions {
+        display: none;
+      }
+
+      .page {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      .intro {
+        min-height: 0;
+        padding: 20px;
+      }
+
+      .search-row,
+      .metric-strip,
+      .split-status,
+      .prompt-grid,
+      .pricing-grid,
+      .admin-stats,
+      .chat-input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .message {
+        max-width: 100%;
+      }
+
+      .mobile-note {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">PH</div>
+        <div class="brand-text">
+          <strong>PromptHub AI</strong>
+          <span>Prompt 创作与 AI 工作台</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" aria-label="页面切换">
+        <button class="active" data-page="market">Prompt 广场</button>
+        <button data-page="generator">AI 生成器</button>
+        <button data-page="chat">多模型对话</button>
+        <button data-page="member">会员中心</button>
+        <button data-page="admin">管理后台</button>
+      </nav>
+
+      <div class="top-actions">
+        <button class="icon-button" title="搜索">⌕</button>
+        <button class="icon-button" title="通知">●</button>
+        <div class="avatar" title="当前用户">林</div>
+      </div>
+    </header>
+
+    <main>
+      <section id="market" class="page active">
+        <p class="mobile-note">这是纯 H5 原型页，顶部导航可以切换用户端和管理后台的主要界面。</p>
+        <div class="workspace">
+          <aside class="sidebar">
+            <p class="sidebar-title">Prompt 分类</p>
+            <ul class="category-list">
+              <li><button class="active">全部模板 <span class="count">1280</span></button></li>
+              <li><button>营销文案 <span class="count">238</span></button></li>
+              <li><button>产品运营 <span class="count">196</span></button></li>
+              <li><button>代码开发 <span class="count">184</span></button></li>
+              <li><button>数据分析 <span class="count">121</span></button></li>
+              <li><button>学习教育 <span class="count">116</span></button></li>
+              <li><button>角色扮演 <span class="count">86</span></button></li>
+            </ul>
+          </aside>
+
+          <div class="main">
+            <div class="hero-panel">
+              <section class="intro">
+                <span class="eyebrow">MVP 用户端首页</span>
+                <h1>从 Prompt 广场开始，完成创作、优化、收藏和 AI 对话。</h1>
+                <p>页面围绕用户最常用的工作流设计：先找模板，再编辑变量，随后交给 AI 生成或优化，并把结果沉淀到历史记录、版本和收藏中。</p>
+                <div class="hero-actions">
+                  <button class="btn primary" data-page="generator">开始生成</button>
+                  <button class="btn ghost" data-page="chat">打开对话</button>
+                  <button class="btn">创建 Prompt</button>
+                </div>
+                <div class="metric-strip">
+                  <div class="metric">
+                    <strong>12.8k</strong>
+                    <span>公开 Prompt</span>
+                  </div>
+                  <div class="metric">
+                    <strong>36ms</strong>
+                    <span>缓存分类响应</span>
+                  </div>
+                  <div class="metric">
+                    <strong>4.9</strong>
+                    <span>模板平均评分</span>
+                  </div>
+                </div>
+              </section>
+
+              <aside class="visual-panel">
+                <div class="visual-toolbar">
+                  <i class="dot"></i>
+                  <i class="dot"></i>
+                  <i class="dot"></i>
+                </div>
+                <div class="prompt-canvas">
+                  <div class="flow-box">
+                    <strong>变量输入</strong>
+                    <span>{行业}、{目标用户}、{语气}、{输出格式}</span>
+                  </div>
+                  <div class="flow-box">
+                    <strong>Prompt 优化</strong>
+                    <span>补全角色、任务、约束、示例和质量检查点。</span>
+                  </div>
+                  <div class="flow-box">
+                    <strong>模型执行</strong>
+                    <span>支持多模型配置、流式响应、Token 统计和历史沉淀。</span>
+                  </div>
+                </div>
+              </aside>
+            </div>
+
+            <div class="search-row">
+              <input class="input" id="promptSearch" placeholder="搜索 Prompt，例如：小红书、代码审查、周报" />
+              <select class="select">
+                <option>全部分类</option>
+                <option>营销文案</option>
+                <option>产品运营</option>
+                <option>代码开发</option>
+              </select>
+              <select class="select">
+                <option>综合排序</option>
+                <option>最多收藏</option>
+                <option>最新发布</option>
+                <option>最多使用</option>
+              </select>
+              <button class="btn primary" id="searchBtn">搜索</button>
+            </div>
+
+            <div class="section-head">
+              <div>
+                <h2>热门 Prompt 模板</h2>
+                <p>卡片展示标题、说明、标签、使用次数和收藏数，适合后续封装成 PromptCard 组件。</p>
+              </div>
+              <button class="btn">查看全部</button>
+            </div>
+
+            <div class="prompt-grid" id="promptGrid">
+              <article class="prompt-card" data-title="小红书爆款标题生成器">
+                <div class="card-top">
+                  <h3>小红书爆款标题生成器</h3>
+                  <span class="badge rose">营销</span>
+                </div>
+                <p>根据产品卖点、人群和语气，输出多组可测试标题，并附带关键词和钩子分析。</p>
+                <div class="tags">
+                  <span class="tag">小红书</span>
+                  <span class="tag">标题</span>
+                  <span class="tag">种草</span>
+                </div>
+                <div class="card-meta">
+                  <span>使用 18,240</span>
+                  <span>收藏 2,931</span>
+                </div>
+              </article>
+
+              <article class="prompt-card" data-title="代码审查助手">
+                <div class="card-top">
+                  <h3>代码审查助手</h3>
+                  <span class="badge green">开发</span>
+                </div>
+                <p>按正确性、安全性、性能、可维护性输出审查意见，适合 PR Review 和重构前检查。</p>
+                <div class="tags">
+                  <span class="tag">Code Review</span>
+                  <span class="tag">安全</span>
+                  <span class="tag">重构</span>
+                </div>
+                <div class="card-meta">
+                  <span>使用 11,652</span>
+                  <span>收藏 1,804</span>
+                </div>
+              </article>
+
+              <article class="prompt-card" data-title="SaaS 产品需求分析">
+                <div class="card-top">
+                  <h3>SaaS 产品需求分析</h3>
+                  <span class="badge teal">产品</span>
+                </div>
+                <p>把用户诉求整理为目标、角色、流程、边界、验收标准和 MVP 优先级。</p>
+                <div class="tags">
+                  <span class="tag">PRD</span>
+                  <span class="tag">MVP</span>
+                  <span class="tag">B 端</span>
+                </div>
+                <div class="card-meta">
+                  <span>使用 9,418</span>
+                  <span>收藏 1,226</span>
+                </div>
+              </article>
+
+              <article class="prompt-card" data-title="周报总结优化器">
+                <div class="card-top">
+                  <h3>周报总结优化器</h3>
+                  <span class="badge amber">办公</span>
+                </div>
+                <p>将零散工作记录改写成结构清晰的周报，突出结果、风险和下周计划。</p>
+                <div class="tags">
+                  <span class="tag">周报</span>
+                  <span class="tag">总结</span>
+                  <span class="tag">职场</span>
+                </div>
+                <div class="card-meta">
+                  <span>使用 7,603</span>
+                  <span>收藏 968</span>
+                </div>
+              </article>
+
+              <article class="prompt-card" data-title="数据分析洞察报告">
+                <div class="card-top">
+                  <h3>数据分析洞察报告</h3>
+                  <span class="badge">分析</span>
+                </div>
+                <p>根据指标变化输出异常解释、业务假设、验证路径和图表建议。</p>
+                <div class="tags">
+                  <span class="tag">指标</span>
+                  <span class="tag">洞察</span>
+                  <span class="tag">报表</span>
+                </div>
+                <div class="card-meta">
+                  <span>使用 6,119</span>
+                  <span>收藏 754</span>
+                </div>
+              </article>
+
+              <article class="prompt-card" data-title="课程教案生成器">
+                <div class="card-top">
+                  <h3>课程教案生成器</h3>
+                  <span class="badge green">教育</span>
+                </div>
+                <p>生成课程目标、课堂流程、互动问题、作业设计和课后评价标准。</p>
+                <div class="tags">
+                  <span class="tag">教案</span>
+                  <span class="tag">课程</span>
+                  <span class="tag">教学</span>
+                </div>
+                <div class="card-meta">
+                  <span>使用 5,442</span>
+                  <span>收藏 631</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="generator" class="page">
+        <div class="tool-layout">
+          <section class="tool-panel">
+            <div class="panel-header">
+              <h2>AI Prompt 生成器</h2>
+              <span class="badge teal">GPT-4.1 Mini</span>
+            </div>
+            <div class="panel-body">
+              <div class="form-grid">
+                <div class="field">
+                  <label>使用场景</label>
+                  <select class="select">
+                    <option>营销文案</option>
+                    <option>代码开发</option>
+                    <option>数据分析</option>
+                    <option>学习教育</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>目标描述</label>
+                  <textarea class="textarea">帮我为一个 AI Prompt 工具平台生成首页转化文案，需要强调模板库、AI 优化、多模型对话和团队协作。</textarea>
+                </div>
+                <div class="field">
+                  <label>输出格式</label>
+                  <select class="select">
+                    <option>结构化 Prompt</option>
+                    <option>可复制文案</option>
+                    <option>表格方案</option>
+                  </select>
+                </div>
+                <button class="btn primary" id="generateBtn">生成 Prompt</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="result-panel">
+            <div class="panel-header">
+              <h2>生成结果</h2>
+              <button class="btn">复制</button>
+            </div>
+            <div class="panel-body">
+              <div class="result-output" id="generatedResult">角色：你是一名资深 SaaS 增长文案专家。
+
+任务：为 PromptHub AI 生成首页核心转化文案。
+
+背景：产品提供 Prompt 模板库、AI Prompt 生成器、Prompt 优化器、多模型对话、收藏、历史记录和版本管理。
+
+输出要求：
+1. 给出 3 个主标题方向。
+2. 每个方向包含副标题和 CTA。
+3. 风格专业、清晰，适合 AI 工具平台。
+4. 避免夸张营销词，突出效率和可复用资产。</div>
+              <div class="split-status">
+                <div class="mini-stat">
+                  <strong>1,284</strong>
+                  <span>预计 Token</span>
+                </div>
+                <div class="mini-stat">
+                  <strong>v1.2</strong>
+                  <span>生成版本</span>
+                </div>
+                <div class="mini-stat">
+                  <strong>已保存</strong>
+                  <span>历史记录</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="chat" class="page">
+        <div class="chat-layout">
+          <aside class="conversation-list">
+            <div class="panel-header">
+              <h3>会话列表</h3>
+              <button class="icon-button" title="新建会话">+</button>
+            </div>
+            <div class="conversation-item active">
+              <strong>Prompt 版本策略</strong>
+              <span>GPT-4.1 Mini · 12 条消息</span>
+            </div>
+            <div class="conversation-item">
+              <strong>会员权益规则</strong>
+              <span>Claude Sonnet · 8 条消息</span>
+            </div>
+            <div class="conversation-item">
+              <strong>支付回调幂等</strong>
+              <span>DeepSeek Chat · 5 条消息</span>
+            </div>
+          </aside>
+
+          <section class="chat-panel">
+            <div class="panel-header">
+              <h2>多模型 AI 对话</h2>
+              <select class="select" style="max-width: 190px;">
+                <option>GPT-4.1 Mini</option>
+                <option>Claude Sonnet</option>
+                <option>DeepSeek Chat</option>
+              </select>
+            </div>
+            <div class="message-list">
+              <div class="message user">请帮我设计 Prompt 版本管理的用户流程。</div>
+              <div class="message assistant">建议从创建、自动保存版本、版本对比、回滚、发布审核五步设计。普通用户看到简化流程，管理员看到审计和审核信息。</div>
+              <div class="message user">需要和收藏、历史记录打通吗？</div>
+              <div class="message assistant">需要。收藏保存的是 Prompt 当前可用版本，历史记录保存每次调用时的版本快照，这样后续回滚不会影响历史可追溯性。</div>
+            </div>
+            <div class="chat-input-row">
+              <input class="input" placeholder="输入消息，Enter 发送" />
+              <button class="btn">停止</button>
+              <button class="btn primary">发送</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="member" class="page">
+        <div class="section-head" style="max-width:1180px;margin-left:auto;margin-right:auto;">
+          <div>
+            <h2>会员中心</h2>
+            <p>用于验证会员套餐、权益说明、订单创建和支付状态展示的页面方向。</p>
+          </div>
+          <span class="badge amber">当前：专业版</span>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="pricing-panel">
+            <span class="badge">Free</span>
+            <h3>体验版</h3>
+            <div class="price">¥0 <small>/ 月</small></div>
+            <ul class="feature-list">
+              <li>每日 10 次 AI 调用</li>
+              <li>公开 Prompt 收藏</li>
+              <li>基础模型访问</li>
+            </ul>
+            <button class="btn">当前套餐</button>
+          </article>
+
+          <article class="pricing-panel" style="border-color:#93c5fd;">
+            <span class="badge teal">Pro</span>
+            <h3>专业版</h3>
+            <div class="price">¥49 <small>/ 月</small></div>
+            <ul class="feature-list">
+              <li>每日 300 次 AI 调用</li>
+              <li>私有 Prompt 模板</li>
+              <li>高级模型访问</li>
+              <li>Prompt 版本管理</li>
+            </ul>
+            <button class="btn primary">续费专业版</button>
+          </article>
+
+          <article class="pricing-panel">
+            <span class="badge amber">Team</span>
+            <h3>团队版</h3>
+            <div class="price">¥199 <small>/ 月</small></div>
+            <ul class="feature-list">
+              <li>团队空间和成员管理</li>
+              <li>共享 Prompt 资产库</li>
+              <li>调用成本统计</li>
+              <li>优先支持</li>
+            </ul>
+            <button class="btn">联系开通</button>
+          </article>
+        </div>
+      </section>
+
+      <section id="admin" class="page">
+        <div class="admin-shell">
+          <aside class="sidebar">
+            <p class="sidebar-title">后台菜单</p>
+            <ul class="menu-list">
+              <li><button class="active">数据看板</button></li>
+              <li><button>用户管理</button></li>
+              <li><button>Prompt 审核</button></li>
+              <li><button>分类管理</button></li>
+              <li><button>角色权限</button></li>
+              <li><button>AI 模型配置</button></li>
+              <li><button>订单支付</button></li>
+              <li><button>审计日志</button></li>
+            </ul>
+          </aside>
+
+          <div class="admin-main">
+            <div class="admin-stats">
+              <div class="mini-stat">
+                <strong>42,810</strong>
+                <span>注册用户</span>
+              </div>
+              <div class="mini-stat">
+                <strong>12,884</strong>
+                <span>Prompt 模板</span>
+              </div>
+              <div class="mini-stat">
+                <strong>389k</strong>
+                <span>AI 调用次数</span>
+              </div>
+              <div class="mini-stat">
+                <strong>¥86,420</strong>
+                <span>月订单金额</span>
+              </div>
+            </div>
+
+            <section class="admin-panel">
+              <div class="panel-header">
+                <h2>Prompt 审核队列</h2>
+                <div class="hero-actions" style="margin:0;">
+                  <button class="btn">刷新</button>
+                  <button class="btn primary">批量通过</button>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>标题</th>
+                      <th>分类</th>
+                      <th>作者</th>
+                      <th>状态</th>
+                      <th>提交时间</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>电商详情页卖点提炼</td>
+                      <td>营销文案</td>
+                      <td>April</td>
+                      <td><span class="status pending">待审核</span></td>
+                      <td>2026-05-08 16:20</td>
+                      <td><button class="btn">查看</button></td>
+                    </tr>
+                    <tr>
+                      <td>Gin API 错误处理模板</td>
+                      <td>代码开发</td>
+                      <td>Marco</td>
+                      <td><span class="status ok">已通过</span></td>
+                      <td>2026-05-08 15:42</td>
+                      <td><button class="btn">查看</button></td>
+                    </tr>
+                    <tr>
+                      <td>用户访谈问题生成器</td>
+                      <td>产品运营</td>
+                      <td>Nina</td>
+                      <td><span class="status off">已驳回</span></td>
+                      <td>2026-05-08 14:18</td>
+                      <td><button class="btn">查看</button></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="admin-panel">
+              <div class="panel-header">
+                <h2>AI 模型配置</h2>
+                <button class="btn primary">新增模型</button>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Provider</th>
+                      <th>模型</th>
+                      <th>最大 Token</th>
+                      <th>状态</th>
+                      <th>排序</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>OpenAI</td>
+                      <td>gpt-4.1-mini</td>
+                      <td>128k</td>
+                      <td><span class="status ok">启用</span></td>
+                      <td>1</td>
+                    </tr>
+                    <tr>
+                      <td>Anthropic</td>
+                      <td>claude-sonnet</td>
+                      <td>200k</td>
+                      <td><span class="status ok">启用</span></td>
+                      <td>2</td>
+                    </tr>
+                    <tr>
+                      <td>Custom</td>
+                      <td>enterprise-local</td>
+                      <td>32k</td>
+                      <td><span class="status pending">测试中</span></td>
+                      <td>3</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const navButtons = document.querySelectorAll("[data-page]");
+    const pages = document.querySelectorAll(".page");
+
+    function showPage(pageId) {
+      pages.forEach((page) => {
+        page.classList.toggle("active", page.id === pageId);
+      });
+      navButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.page === pageId);
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    const searchInput = document.getElementById("promptSearch");
+    const searchBtn = document.getElementById("searchBtn");
+    const promptCards = document.querySelectorAll(".prompt-card");
+
+    function filterPrompts() {
+      const keyword = searchInput.value.trim().toLowerCase();
+      promptCards.forEach((card) => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = !keyword || text.includes(keyword) ? "flex" : "none";
+      });
+    }
+
+    searchBtn.addEventListener("click", filterPrompts);
+    searchInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") filterPrompts();
+    });
+
+    document.getElementById("generateBtn").addEventListener("click", () => {
+      const result = document.getElementById("generatedResult");
+      result.textContent = `角色：你是资深 Prompt 工程师和产品增长顾问。
+
+任务：根据用户目标生成可直接执行的高质量 Prompt。
+
+输入变量：
+- 产品：PromptHub AI
+- 核心能力：模板库、AI 生成、AI 优化、多模型对话、版本管理
+- 目标用户：内容运营、产品经理、开发者和团队管理员
+
+输出结构：
+1. 明确角色和任务目标。
+2. 补充业务背景和受众。
+3. 定义输出格式、限制条件和质量标准。
+4. 给出 3 个可选表达方向。
+5. 最后生成可复制的最终 Prompt。`;
+    });
+  </script>
+</body>
+</html>
