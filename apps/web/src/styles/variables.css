@@ -1,0 +1,14 @@
+:root {
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  --gradient-hero: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+  --gradient-card: linear-gradient(145deg, rgba(99, 102, 241, 0.04) 0%, rgba(6, 182, 212, 0.02) 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+
+  /* Glow */
+  --primary-glow: rgba(99, 102, 241, 0.12);
+  --shadow-glow: 0 0 32px rgba(99, 102, 241, 0.08);
+
+  /* Transition */
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
